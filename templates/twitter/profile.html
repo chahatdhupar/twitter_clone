@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+
+        <!-- Profile Header -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+
+                    <!-- Profile Picture -->
+                    {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}"
+                             class="profile-img-lg me-3"
+                             alt="{{ profile_user.username }}">
+                    {% else %}
+                        <div class="profile-img-lg me-3 bg-primary d-flex
+                                    align-items-center justify-content-center
+                                    text-white fw-bold"
+                             style="font-size:2rem;">
+                            {{ profile_user.username|first|upper }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Profile Info -->
+                    <div class="flex-grow-1">
+                        <h4 class="mb-0">{{ profile_user.username }}</h4>
+                        <p class="text-muted mb-2">
+                            {{ profile.bio|default:"No bio yet" }}
+                        </p>
+                        <div class="d-flex gap-3">
+                            <small>
+                                <strong>{{ tweets.count }}</strong>
+                                <span class="text-muted">Tweets</span>
+                            </small>
+
+                            <!-- Followers count - clickable -->
+                            <a href="{% url 'followers_list' profile_user.username %}"
+                            class="text-decoration-none text-dark">
+                                <small>
+                                    <strong>{{ profile.get_followers_count }}</strong>
+                                    <span class="text-muted">Followers</span>
+                                </small>
+                            </a>
+
+                            <!-- Following count - clickable -->
+                            <a href="{% url 'following_list' profile_user.username %}"
+                            class="text-decoration-none text-dark">
+                                <small>
+                                    <strong>{{ profile.get_following_count }}</strong>
+                                    <span class="text-muted">Following</span>
+                                </small>
+                            </a>
+                            {% if profile_user != request.user %}
+                                <a href="{% url 'chat' profile_user.username %}"
+                                class="btn btn-sm btn-outline-secondary ms-2">
+                                💬 Message
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Follow/Edit Buttons -->
+                    <div>
+                        {% if profile_user == request.user %}
+                            <a href="{% url 'edit_profile' %}"
+                               class="btn btn-outline-primary btn-sm">
+                               Edit Profile
+                            </a>
+                        {% else %}
+                            <a href="{% url 'follow_user' profile_user.username %}"
+                               class="btn btn-sm
+                               {% if is_following %}btn-outline-primary
+                               {% else %}btn-primary{% endif %}">
+                               {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                            </a>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- User Tweets -->
+        {% if tweets %}
+            {% for tweet in tweets %}
+            <div class="card shadow-sm tweet-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <small class="text-muted">
+                            {{ tweet.created_at|timesince }} ago
+                        </small>
+                        {% if tweet.user == request.user %}
+                            <a href="{% url 'delete_tweet' tweet.id %}"
+                               class="btn btn-sm btn-outline-danger">🗑</a>
+                        {% endif %}
+                    </div>
+                    <p class="mb-2">{{ tweet.content }}</p>
+                    {% if tweet.image %}
+                        <img src="{{ tweet.image.url }}"
+                             class="img-fluid rounded mb-2"
+                             alt="tweet image">
+                    {% endif %}
+                    <div>
+                        <a href="{% url 'like_tweet' tweet.id %}"
+                           class="text-decoration-none">
+                            {% if request.user in tweet.likes.all %}
+                                ❤️ {{ tweet.get_likes_count }}
+                            {% else %}
+                                🤍 {{ tweet.get_likes_count }}
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center mt-4">
+                <h5 class="text-muted">No tweets yet!</h5>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

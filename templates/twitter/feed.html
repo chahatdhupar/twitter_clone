@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Feed{% endblock %}
+
+{% block content %}
+<div class="row">
+
+    <!-- Tweet Form + Feed -->
+    <div class="col-md-8">
+
+        <!-- Post Tweet Form -->
+        <div class="card shadow-sm tweet-card mb-4">
+            <div class="card-body">
+                <h6 class="mb-3">What's happening?</h6>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="mb-3">
+                        {{ field }}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Max 280 characters</small>
+                        <button type="submit" class="btn btn-primary btn-sm px-4">
+                            Tweet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tweets List -->
+        {% if tweets %}
+            {% for tweet in tweets %}
+            <div class="card shadow-sm tweet-card">
+                <div class="card-body">
+
+                    <!-- Tweet Header -->
+                    <div class="d-flex align-items-center mb-2">
+                        <!-- Profile Picture -->
+                        {% if tweet.user.profile.profile_picture %}
+                            <img src="{{ tweet.user.profile.profile_picture.url }}"
+                                 class="profile-img me-2"
+                                 alt="{{ tweet.user.username }}">
+                        {% else %}
+                            <div class="profile-img me-2 bg-primary d-flex
+                                        align-items-center justify-content-center
+                                        text-white fw-bold">
+                                {{ tweet.user.username|first|upper }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Username and date -->
+                        <div>
+                            <a href="{% url 'profile' tweet.user.username %}"
+                               class="fw-bold text-dark text-decoration-none">
+                               {{ tweet.user.username }}
+                            </a>
+                            <small class="text-muted d-block">
+                                {{ tweet.created_at|timesince }} ago
+                            </small>
+                        </div>
+
+                        <!-- Delete button (only for own tweets) -->
+                        {% if tweet.user == request.user %}
+                            <a href="{% url 'delete_tweet' tweet.id %}"
+                               class="btn btn-sm btn-outline-danger ms-auto">
+                               🗑
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Tweet Content -->
+                    <p class="mb-2">{{ tweet.content }}</p>
+
+                    <!-- Tweet Image -->
+                    {% if tweet.image %}
+                        <img src="{{ tweet.image.url }}"
+                             class="img-fluid rounded mb-2"
+                             alt="tweet image">
+                    {% endif %}
+
+                    <!-- Like Button -->
+                    <!-- Like Button + Comment Link -->
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{% url 'like_tweet' tweet.id %}"
+                        class="text-decoration-none">
+                            {% if request.user in tweet.likes.all %}
+                                ❤️ {{ tweet.get_likes_count }}
+                            {% else %}
+                                🤍 {{ tweet.get_likes_count }}
+                            {% endif %}
+                        </a>
+
+                        <!-- Comment link -->
+                        <a href="{% url 'tweet_detail' tweet.id %}"
+                        class="text-decoration-none text-muted">
+                            💬 {{ tweet.comment_set.count }}
+                        </a>
+
+                        {% if not tweet.is_retweet %}
+                            <a href="{% url 'retweet' tweet.id %}"
+                            class="text-decoration-none text-success">
+                                🔁 {{ tweet.get_retweet_count }}
+                            </a>
+                        {% endif %}
+
+                        <a href="{% url 'bookmark_tweet' tweet.id %}"
+                        class="text-decoration-none ms-auto">
+                            {% if tweet.id in bookmarked_ids %}
+                                🔖
+                            {% else %}
+                                🏷️
+                            {% endif %}
+                        </a>
+                    </div>
+                    <!-- Show retweet label -->
+                    {% if tweet.is_retweet %}
+                        <small class="text-muted">
+                            🔁 Retweeted from
+                            <a href="{% url 'profile' tweet.original_tweet.user.username %}">
+                                {{ tweet.original_tweet.user.username }}
+                            </a>
+                        </small>
+                    {% endif %}
+
+
+
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="text-center mt-5">
+                <h1>🐦</h1>
+                <h5 class="text-muted mt-3">No tweets yet!</h5>
+                <p class="text-muted">
+                    Follow some users or post your first tweet
+                </p>
+                <a href="{% url 'search' %}" class="btn btn-primary">
+                    Find Users to Follow
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Your Profile</h6>
+                <div class="d-flex align-items-center">
+                    {% if request.user.profile.profile_picture %}
+                        <img src="{{ request.user.profile.profile_picture.url }}"
+                             class="profile-img me-2"
+                             alt="{{ request.user.username }}">
+                    {% else %}
+                        <div class="profile-img me-2 bg-primary d-flex
+                                    align-items-center justify-content-center
+                                    text-white fw-bold">
+                            {{ request.user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <p class="fw-bold mb-0">{{ request.user.username }}</p>
+                        <small class="text-muted">
+                            {{ request.user.profile.get_followers_count }}
+                            followers
+                        </small>
+                    </div>
+                </div>
+                <div class="d-grid mt-3">
+                    <a href="{% url 'profile' request.user.username %}"
+                       class="btn btn-outline-primary btn-sm">
+                       View Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">🔥 Trending</h6>
+                {% if trending %}
+                    {% for hashtag in trending %}
+                    <a href="{% url 'hashtag_tweets' hashtag.name %}"
+                    class="text-decoration-none d-block mb-2">
+                        <span class="text-primary fw-bold">#{{ hashtag.name }}</span>
+                        <small class="text-muted ms-2">
+                            {{ hashtag.get_tweet_count }} tweets
+                        </small>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted small">
+                        No trending hashtags yet. Use #hashtag in tweets!
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

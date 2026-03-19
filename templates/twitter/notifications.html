@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h4 class="mb-4">🔔 Notifications</h4>
+
+        {% if notifications %}
+            {% for notification in notifications %}
+            <div class="card shadow-sm mb-2
+                {% if not notification.is_read %}border-primary{% endif %}">
+                <div class="card-body py-2">
+                    <div class="d-flex align-items-center">
+
+                        <!-- Sender Profile Picture -->
+                        {% if notification.sender.profile.profile_picture %}
+                            <img src="{{ notification.sender.profile.profile_picture.url }}"
+                                 class="profile-img me-3"
+                                 alt="{{ notification.sender.username }}">
+                        {% else %}
+                            <div class="profile-img me-3 bg-primary d-flex
+                                        align-items-center justify-content-center
+                                        text-white fw-bold">
+                                {{ notification.sender.username|first|upper }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Notification Text -->
+                        <div class="flex-grow-1">
+                            <a href="{% url 'profile' notification.sender.username %}"
+                               class="fw-bold text-dark text-decoration-none">
+                               {{ notification.sender.username }}
+                            </a>
+
+                            {% if notification.notification_type == 'like' %}
+                                ❤️ liked your tweet
+                            {% elif notification.notification_type == 'comment' %}
+                                💬 commented on your tweet
+                            {% elif notification.notification_type == 'follow' %}
+                                👤 started following you
+                            {% elif notification.notification_type == 'retweet' %}
+                                🔁 retweeted your tweet
+                            {% endif %}
+
+                            <small class="text-muted d-block">
+                                {{ notification.created_at|timesince }} ago
+                            </small>
+                        </div>
+
+                        <!-- View Tweet Link -->
+                        {% if notification.tweet %}
+                            <a href="{% url 'tweet_detail' notification.tweet.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                               View
+                            </a>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="text-center mt-5">
+                <h1>🔔</h1>
+                <h5 class="text-muted mt-3">No notifications yet!</h5>
+                <p class="text-muted">
+                    When someone likes or follows you it will appear here
+                </p>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

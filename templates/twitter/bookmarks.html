@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Bookmarks{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h4 class="mb-4">🔖 Bookmarks</h4>
+
+        {% if bookmarks %}
+            {% for bookmark in bookmarks %}
+            <div class="card shadow-sm tweet-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        {% if bookmark.tweet.user.profile.profile_picture %}
+                            <img src="{{ bookmark.tweet.user.profile.profile_picture.url }}"
+                                 class="profile-img me-2"
+                                 alt="{{ bookmark.tweet.user.username }}">
+                        {% else %}
+                            <div class="profile-img me-2 bg-primary d-flex
+                                        align-items-center justify-content-center
+                                        text-white fw-bold">
+                                {{ bookmark.tweet.user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <a href="{% url 'profile' bookmark.tweet.user.username %}"
+                               class="fw-bold text-dark text-decoration-none">
+                               {{ bookmark.tweet.user.username }}
+                            </a>
+                            <small class="text-muted d-block">
+                                {{ bookmark.tweet.created_at|timesince }} ago
+                            </small>
+                        </div>
+                    </div>
+                    <p>{{ bookmark.tweet.content }}</p>
+                    {% if bookmark.tweet.image %}
+                        <img src="{{ bookmark.tweet.image.url }}"
+                             class="img-fluid rounded mb-2">
+                    {% endif %}
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'tweet_detail' bookmark.tweet.id %}"
+                           class="btn btn-sm btn-outline-primary">
+                           View Tweet
+                        </a>
+                        <a href="{% url 'bookmark_tweet' bookmark.tweet.id %}"
+                           class="btn btn-sm btn-outline-danger">
+                           Remove Bookmark
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="text-center mt-5">
+                <h1>🔖</h1>
+                <h5 class="text-muted mt-3">No bookmarks yet!</h5>
+                <p class="text-muted">Save tweets to read later</p>
+                <a href="{% url 'feed' %}" class="btn btn-primary">
+                    Go to Feed
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

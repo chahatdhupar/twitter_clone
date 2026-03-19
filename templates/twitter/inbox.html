@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Inbox{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h4 class="mb-4">💬 Inbox</h4>
+
+        {% if chat_users %}
+            {% for chat_user in chat_users %}
+            <a href="{% url 'chat' chat_user.username %}"
+               class="text-decoration-none">
+                <div class="card shadow-sm mb-2">
+                    <div class="card-body d-flex align-items-center">
+                        {% if chat_user.profile.profile_picture %}
+                            <img src="{{ chat_user.profile.profile_picture.url }}"
+                                 class="profile-img me-3"
+                                 alt="{{ chat_user.username }}">
+                        {% else %}
+                            <div class="profile-img me-3 bg-primary d-flex
+                                        align-items-center justify-content-center
+                                        text-white fw-bold">
+                                {{ chat_user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <p class="fw-bold mb-0 text-dark">
+                                {{ chat_user.username }}
+                            </p>
+                            <small class="text-muted">Click to open chat</small>
+                        </div>
+                        <span class="ms-auto text-primary">→</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+
+        {% else %}
+            <div class="text-center mt-5">
+                <h1>💬</h1>
+                <h5 class="text-muted mt-3">No messages yet!</h5>
+                <p class="text-muted">
+                    Visit a user profile to send a message
+                </p>
+                <a href="{% url 'search' %}" class="btn btn-primary">
+                    Find Users
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

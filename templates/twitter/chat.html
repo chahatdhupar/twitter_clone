@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat with {{ other_user.username }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+
+        <!-- Chat Header -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body d-flex align-items-center py-2">
+                <a href="{% url 'inbox' %}"
+                   class="btn btn-outline-secondary btn-sm me-3">←</a>
+                {% if other_user.profile.profile_picture %}
+                    <img src="{{ other_user.profile.profile_picture.url }}"
+                         class="profile-img me-2"
+                         alt="{{ other_user.username }}">
+                {% else %}
+                    <div class="profile-img me-2 bg-primary d-flex
+                                align-items-center justify-content-center
+                                text-white fw-bold">
+                        {{ other_user.username|first|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <a href="{% url 'profile' other_user.username %}"
+                       class="fw-bold text-dark text-decoration-none">
+                       {{ other_user.username }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body" style="height:400px; overflow-y:auto;" id="chat-box">
+                {% if messages_list %}
+                    {% for msg in messages_list %}
+                    <div class="d-flex mb-3
+                        {% if msg.sender == request.user %}
+                            justify-content-end
+                        {% endif %}">
+                        <div class="px-3 py-2 rounded
+                            {% if msg.sender == request.user %}
+                                bg-primary text-white
+                            {% else %}
+                                bg-light
+                            {% endif %}"
+                            style="max-width:70%;">
+                            <p class="mb-0">{{ msg.content }}</p>
+                            <small class="opacity-75">
+                                {{ msg.created_at|timesince }} ago
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center mt-5">
+                        <p class="text-muted">
+                            No messages yet. Say hello! 👋
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Message Form -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST" class="d-flex gap-2">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="flex-grow-1">{{ field }}</div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Auto scroll to bottom of chat -->
+<script>
+    const chatBox = document.getElementById('chat-box');
+    chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.username }} Following{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+
+        <!-- Header -->
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'profile' profile_user.username %}"
+               class="btn btn-outline-secondary btn-sm me-3">
+               ← Back
+            </a>
+            <h4 class="mb-0">
+                {{ profile_user.username }} is Following
+            </h4>
+        </div>
+
+        {% if following %}
+            {% for profile in following %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-body d-flex align-items-center">
+
+                    <!-- Profile Picture -->
+                    {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}"
+                             class="profile-img me-3"
+                             alt="{{ profile.user.username }}">
+                    {% else %}
+                        <div class="profile-img me-3 bg-primary d-flex
+                                    align-items-center justify-content-center
+                                    text-white fw-bold">
+                            {{ profile.user.username|first|upper }}
+                        </div>
+                    {% endif %}
+
+                    <!-- User Info -->
+                    <div class="flex-grow-1">
+                        <p class="fw-bold mb-0">{{ profile.user.username }}</p>
+                        <small class="text-muted">
+                            {{ profile.get_followers_count }} followers
+                        </small>
+                    </div>
+
+                    <!-- View Profile Button -->
+                    <a href="{% url 'profile' profile.user.username %}"
+                       class="btn btn-sm btn-outline-primary">
+                       View Profile
+                    </a>
+
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="text-center mt-5">
+                <h1>👥</h1>
+                <h5 class="text-muted mt-3">Not following anyone yet!</h5>
+                <a href="{% url 'search' %}" class="btn btn-primary mt-2">
+                    Find Users to Follow
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
